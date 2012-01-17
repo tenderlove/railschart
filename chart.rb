@@ -11,7 +11,21 @@ class Travis
         all +
         railties +
         ap_am_amo_ares_as +
+        mysql2 +
         footer
+    end
+
+
+    def ap_am_amo_ares_as
+      chart_for 'ap,am,amo,ares,as'
+    end
+
+    def railties
+      chart_for 'railties'
+    end
+
+    def mysql2
+      chart_for 'ar:mysql2'
     end
 
     def header
@@ -35,7 +49,7 @@ class Travis
         all();
         railties();
         ap_am_amo_ares_as();
-        // ar_mysql2();
+        ar_mysql2();
         // ar_mysql();
         // ar_postgresql();
       }
@@ -83,14 +97,6 @@ class Travis
         chart.draw(data, options);
       }
       eojs
-    end
-
-    def ap_am_amo_ares_as
-      chart_for 'ap,am,amo,ares,as'
-    end
-
-    def railties
-      chart_for 'railties'
     end
 
     def all
