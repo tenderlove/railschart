@@ -18,6 +18,7 @@
         });
         all(passed);
         railties(passed);
+        ap_am_amo_ares_as(passed);
       }
 
       function all(builds) {
@@ -48,9 +49,19 @@
       }
 
       function railties(builds) {
+        chart(builds, 'railties');
+      }
+
+      function ap_am_amo_ares_as(builds) {
+        chart(builds, 'ap,am,amo,ares,as');
+      }
+
+      function chart(builds, name) {
         var data = new google.visualization.DataTable();
+        var elementId = name.replace(/,/g, '_');
+        alert(elementId);
         data.addColumn('string', 'Build');
-        data.addColumn('number', 'railties');
+        data.addColumn('number', name);
         data.addColumn('number', 'avg(3)');
 
         var buildIds = builds.map(function(build) {
@@ -59,7 +70,7 @@
 
         var times = builds.map(function(build) {
           var matrix = build.matrix.filter(function(matrix) {
-            return matrix.config.env == "GEM=railties";
+            return matrix.config.env == ("GEM=" + name);
           })[0];
 
           var start  = Date.parse(matrix.started_at);
@@ -73,10 +84,10 @@
         }
 
         // Set chart options
-        var options = chartOptions('Test Time for railties on TravisCI');
+        var options = chartOptions('Test Time for ' + name + ' on TravisCI');
 
         // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.LineChart(document.getElementById('railties'));
+        var chart = new google.visualization.LineChart(document.getElementById(elementId));
         chart.draw(data, options);
       }
 
