@@ -7,7 +7,10 @@ class Travis
     end
 
     def to_html
-      header + all + footer
+      header +
+        all +
+        railties +
+        footer
     end
 
     def header
@@ -28,14 +31,57 @@ class Travis
       // instantiates the pie chart, passes in the data and
       // draws it.
       function drawChart() {
+        railties();
         all();
-        // railties();
         // ap_am_amo_ares_as();
         // ar_mysql2();
         // ar_mysql();
         // ar_postgresql();
       }
       eohtml
+    end
+
+    def railties
+      columns = [
+        "data.addColumn('number', 'railties');",
+        "data.addColumn('number', 'avg(3)');",
+      ].join "\n"
+
+      durations = builds.map { |build|
+        command = build.details.commands.find { |c|
+          c.env == 'GEM=railties'
+        }
+        [build.number, command.duration]
+      }
+      avgs = durations.map(&:last).each_cons(3).map { |a,b,c|
+        (a + b + c) / 3
+      }
+
+      # FIXME: make the list the same number. I should find a better way to
+      # do this, for example: does google chart allow null data?
+      avgs.unshift durations[1].last
+      avgs.unshift durations[0].last
+
+      data = durations.zip(avgs).map(&:flatten).inspect
+
+      <<-eojs
+      function railties() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Build');
+          #{columns}
+        data.addRows(#{data});
+
+        // Set chart options
+        var options = {'title':'Test Time for railties on TravisCI',
+                       'width':900,
+                       'height':300,
+                       'legend': { 'position': 'bottom' } };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.LineChart(document.getElementById('railties'));
+        chart.draw(data, options);
+      }
+      eojs
     end
 
     def all
