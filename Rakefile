@@ -25,3 +25,17 @@ task :clean do
   rm 'report.html'
   rm 'builds.marshal'
 end
+
+task :json do
+  t = Travis.new
+  if File.exists? 'builds.marshal'
+    builds = Marshal.load File.read 'builds.marshal'
+  else
+    builds = t.latest_builds
+    builds.each(&:details)
+    File.write 'builds.marshal', Marshal.dump(builds)
+  end
+
+  json = JSON.dump builds.map { |b| b.details.to_hash }
+  puts "function travisdata() { return #{json}; }"
+end

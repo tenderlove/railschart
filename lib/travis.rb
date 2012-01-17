@@ -3,6 +3,7 @@ require 'net/http'
 require 'uri'
 require 'date'
 require 'chart'
+require 'json'
 
 class Travis
   Build = Struct.new(:internal, :travis) do
@@ -47,7 +48,6 @@ class Travis
     private :internal
 
     def commands
-      internal['matrix'].first
       internal['matrix'].map { |x|
         c = Command.new(*x.values_at(*%w{ started_at finished_at status }))
         c.env = x['config']['env']
@@ -57,6 +57,26 @@ class Travis
 
     def passed?
       commands.all? { |x| x.status == 0 }
+    end
+
+    def to_hash
+      {
+        'matrix' => internal['matrix'].map { |x|
+          {
+            'started_at'  => x['started_at'],
+            'finished_at' => x['finished_at'],
+            'status'      => x['status'],
+            'config'      => { 'env' => x['config']['env'] }
+          }
+        },
+        'branch' => internal['branch'],
+        'number' => internal['number'],
+        'id'     => internal['id'],
+      }
+    end
+
+    def to_json
+      JSON.dump to_hash
     end
   end
 
