@@ -12,6 +12,9 @@ class Travis
         railties +
         ap_am_amo_ares_as +
         mysql2 +
+        mysql +
+        postgresql +
+        sqlite3 +
         footer
     end
 
@@ -26,6 +29,18 @@ class Travis
 
     def mysql2
       chart_for 'ar:mysql2'
+    end
+
+    def mysql
+      chart_for 'ar:mysql'
+    end
+
+    def postgresql
+      chart_for 'ar:postgresql'
+    end
+
+    def sqlite3
+      chart_for 'ar:sqlite3'
     end
 
     def header
@@ -50,13 +65,14 @@ class Travis
         railties();
         ap_am_amo_ares_as();
         ar_mysql2();
-        // ar_mysql();
-        // ar_postgresql();
+        ar_mysql();
+        ar_postgresql();
+        ar_sqlite3();
       }
       eohtml
     end
 
-    def chart_for name
+    def chart_for name, avg_size = 3
       columns = [
         "data.addColumn('number', '#{name.gsub(',', ':')}');",
         "data.addColumn('number', 'avg(3)');",
@@ -68,8 +84,8 @@ class Travis
         }
         [build.number, command.duration]
       }
-      avgs = durations.map(&:last).each_cons(3).map { |a,b,c|
-        (a + b + c) / 3
+      avgs = durations.map(&:last).each_cons(avg_size).map { |list|
+        list.inject(:+) / avg_size
       }
 
       # FIXME: make the list the same number. I should find a better way to
@@ -140,6 +156,7 @@ class Travis
     <div id="all"></div>
     <div id="railties"></div>
     <div id="ap_am_amo_ares_as"></div>
+    <div id="ar_sqlite3"></div>
     <div id="ar_mysql2"></div>
     <div id="ar_mysql"></div>
     <div id="ar_postgresql"></div>

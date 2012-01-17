@@ -73,26 +73,3 @@ class Travis
     Details.new Psych.load body
   end
 end
-
-t = Travis.new
-if File.exists? 'builds.marshal'
-  master_builds = Marshal.load File.read 'builds.marshal'
-else
-  master_builds = t.latest_builds.find_all { |x|
-    x.branch == 'master' && x.passed?
-  }
-  File.write 'builds.marshal', Marshal.dump(master_builds)
-end
-
-chart = Travis::Chart.new master_builds
-puts chart.to_html
-#columns = master_builds.first.details.commands.map { |c|
-#  "data.addColumn('number', '#{c.env}');"
-#}.join "\n"
-#
-#puts columns
-#
-#master_builds.each do |build|
-#  times = build.details.commands.map { |c| c.duration }.join(', ')
-#  puts "['#{build.number}', #{times}],"
-#end
