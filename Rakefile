@@ -26,10 +26,12 @@ task :clean do
   rm 'builds.marshal'
 end
 
-task :json do
+file 'report.js' do
   t = Travis.new
   builds = t.latest(150)
 
   json = JSON.dump builds.map { |b| t.details(b['id']) }
-  puts "function travisdata() { return #{json}; }"
+  File.open('report.js', 'w') { |f|
+    f.write "function travisdata() { return #{json}; }"
+  }
 end
