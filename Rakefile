@@ -18,3 +18,10 @@ file 'report.html' do
   }
   File.write 'report.html', chart.to_html
 end
+
+task :default => 'report.html'
+
+task :clean do
+  rm 'report.html'
+  rm 'builds.marshal'
+end
