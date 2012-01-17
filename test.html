@@ -17,8 +17,10 @@
           return parseInt(l.number) - parseInt(r.number);
         });
         all(passed);
-        railties(passed);
-        ap_am_amo_ares_as(passed);
+        passed[0].matrix.map(function(m) {
+          var env = m.config.env.split('=', 2)[1];
+          chart(passed, env);
+        });
       }
 
       function all(builds) {
@@ -48,18 +50,9 @@
         chart.draw(data, options);
       }
 
-      function railties(builds) {
-        chart(builds, 'railties');
-      }
-
-      function ap_am_amo_ares_as(builds) {
-        chart(builds, 'ap,am,amo,ares,as');
-      }
-
       function chart(builds, name) {
         var data = new google.visualization.DataTable();
-        var elementId = name.replace(/,/g, '_');
-        alert(elementId);
+        var elementId = name.replace(/[,:]/g, '_');
         data.addColumn('string', 'Build');
         data.addColumn('number', name);
         data.addColumn('number', 'avg(3)');
@@ -114,7 +107,7 @@
 
       function chartOptions(title) {
         return { 'title': title,
-                 'width':900,
+                 'width':1000,
                  'height':300,
                  'legend': { 'position': 'bottom' },
                  'hAxis': { 'title': 'Build ID' },
