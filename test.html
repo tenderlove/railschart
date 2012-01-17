@@ -17,6 +17,7 @@
           return parseInt(l.number) - parseInt(r.number);
         });
         all(passed);
+        railties(passed);
       }
 
       function all(builds) {
@@ -39,12 +40,65 @@
         });
 
         // Set chart options
-        var options = chartOptions(
-            'Test Time for master on TravisCI');
+        var options = chartOptions('Test Time for master on TravisCI');
 
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.LineChart(document.getElementById('all'));
         chart.draw(data, options);
+      }
+
+      function railties(builds) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Build');
+        data.addColumn('number', 'railties');
+        data.addColumn('number', 'avg(3)');
+
+        var buildIds = builds.map(function(build) {
+          return build.number;
+        });
+
+        var times = builds.map(function(build) {
+          var matrix = build.matrix.filter(function(matrix) {
+            return matrix.config.env == "GEM=railties";
+          })[0];
+
+          var start  = Date.parse(matrix.started_at);
+          var finish = Date.parse(matrix.finished_at);
+          return (finish - start) / 1000;
+        });
+
+        var avgs = movingAvg(times, 3);
+        for(var i = 0; i < times.length; i++) {
+          data.addRow([buildIds[i], times[i], avgs[i]]);
+        }
+
+        // Set chart options
+        var options = chartOptions('Test Time for railties on TravisCI');
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.LineChart(document.getElementById('railties'));
+        chart.draw(data, options);
+      }
+
+      function eachCons(collection, length, cb) {
+        var list = []
+        for(var i = 0; i + length <= collection.length; i++) {
+          list.push(cb(collection.slice(i, i + length)));
+        }
+        return list;
+      }
+
+      function movingAvg(numbers, length) {
+        var avgs = eachCons(numbers, length, function(slice) {
+          return slice.reduce(function(a, b) { return a + b; }) / length;
+        });
+        // HACK: making the first +length - 1+ numbers equal to the
+        // passed in numbers.
+        for(var i = length - 1; i > 0; i--) {
+          avgs.unshift(numbers[i - 1]);
+        }
+
+        return avgs;
       }
 
       function chartOptions(title) {
