@@ -75,7 +75,7 @@ class Travis
     def chart_for name, avg_size = 3
       columns = [
         "data.addColumn('number', '#{name.gsub(',', ':')}');",
-        "data.addColumn('number', 'avg(3)');",
+        "data.addColumn('number', 'avg(#{avg_size})');",
       ].join "\n"
 
       durations = builds.map { |build|
@@ -90,8 +90,9 @@ class Travis
 
       # FIXME: make the list the same number. I should find a better way to
       # do this, for example: does google chart allow null data?
-      avgs.unshift durations[1].last
-      avgs.unshift durations[0].last
+      (avg_size - 1).downto(0) do |i|
+        avgs.unshift durations[i].last
+      end
 
       data = durations.zip(avgs).map(&:flatten).inspect
 
