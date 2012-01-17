@@ -42,15 +42,15 @@ class Travis
       eohtml
     end
 
-    def ap_am_amo_ares_as
+    def chart_for name
       columns = [
-        "data.addColumn('number', 'ap:am:amo:ares:as');",
+        "data.addColumn('number', '#{name.gsub(',', ':')}');",
         "data.addColumn('number', 'avg(3)');",
       ].join "\n"
 
       durations = builds.map { |build|
         command = build.details.commands.find { |c|
-          c.env == 'GEM=ap,am,amo,ares,as'
+          c.env == "GEM=#{name}"
         }
         [build.number, command.duration]
       }
@@ -66,66 +66,31 @@ class Travis
       data = durations.zip(avgs).map(&:flatten).inspect
 
       <<-eojs
-      function ap_am_amo_ares_as() {
+      function #{name.gsub(/[:,]/, '_')}() {
         var data = new google.visualization.DataTable();
         data.addColumn('string', 'Build');
           #{columns}
         data.addRows(#{data});
 
         // Set chart options
-        var options = {'title':'Test Time for ap:am:amo:ares:as on TravisCI',
+        var options = {'title':'Test Time for #{name} on TravisCI',
                        'width':900,
                        'height':300,
                        'legend': { 'position': 'bottom' } };
 
         // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.LineChart(document.getElementById('ap_am_amo_ares_as'));
+        var chart = new google.visualization.LineChart(document.getElementById('#{name.gsub(/[:,]/, '_')}'));
         chart.draw(data, options);
       }
       eojs
     end
 
+    def ap_am_amo_ares_as
+      chart_for 'ap,am,amo,ares,as'
+    end
+
     def railties
-      columns = [
-        "data.addColumn('number', 'railties');",
-        "data.addColumn('number', 'avg(3)');",
-      ].join "\n"
-
-      durations = builds.map { |build|
-        command = build.details.commands.find { |c|
-          c.env == 'GEM=railties'
-        }
-        [build.number, command.duration]
-      }
-      avgs = durations.map(&:last).each_cons(3).map { |a,b,c|
-        (a + b + c) / 3
-      }
-
-      # FIXME: make the list the same number. I should find a better way to
-      # do this, for example: does google chart allow null data?
-      avgs.unshift durations[1].last
-      avgs.unshift durations[0].last
-
-      data = durations.zip(avgs).map(&:flatten).inspect
-
-      <<-eojs
-      function railties() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Build');
-          #{columns}
-        data.addRows(#{data});
-
-        // Set chart options
-        var options = {'title':'Test Time for railties on TravisCI',
-                       'width':900,
-                       'height':300,
-                       'legend': { 'position': 'bottom' } };
-
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.LineChart(document.getElementById('railties'));
-        chart.draw(data, options);
-      }
-      eojs
+      chart_for 'railties'
     end
 
     def all
