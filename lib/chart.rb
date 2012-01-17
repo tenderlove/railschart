@@ -106,6 +106,8 @@ class Travis
         // Set chart options
         var options = {'title':'Test Time for #{name} on TravisCI',
                        'width':900,
+                       'hAxis': { 'title': 'Build ID' },
+                       'vAxis': { 'title': 'Seconds' },
                        'height':300,
                        'legend': { 'position': 'bottom' } };
 
@@ -139,7 +141,10 @@ class Travis
         var options = {'title':'Test Time for master on TravisCI',
                        'width':900,
                        'height':300,
-                       'legend': { 'position': 'bottom' } };
+                       'legend': { 'position': 'bottom' },
+                       'hAxis': { 'title': 'Build ID' },
+                       'vAxis': { 'title': 'Seconds' }
+                       };
 
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.LineChart(document.getElementById('all'));
