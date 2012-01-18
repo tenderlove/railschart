@@ -89,10 +89,30 @@
 
         // Set chart options
         var options = chartOptions('Test Time for ' + name + ' on TravisCI');
+        options.title += ' (stddev: ' + stddev(times) + ')';
 
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.LineChart(document.getElementById(elementId));
         chart.draw(data, options);
+      }
+
+      function mean(numbers) {
+        return numbers.reduce(function(a, b) {
+            return a + b;
+        }) / numbers.length;
+      }
+
+      function stddev(numbers) {
+        var m = mean(numbers);
+        var square_deviations = numbers.map(function(number) {
+          return Math.pow(number - m, 2);
+        });
+
+        var square_sum = square_deviations.reduce(function(a, b) {
+            return a + b;
+        });
+
+        return Math.sqrt(square_sum / (numbers.length - 1));
       }
 
       function eachCons(collection, length, cb) {
