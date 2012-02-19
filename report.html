@@ -34,13 +34,35 @@
         });
       }
 
+      function groupBy(list, func) {
+        var groups = {};
+        list.forEach(function(item) {
+          var key = func(item);
+          if(!groups[key]) groups[key] = []
+          groups[key].push(item);
+        });
+        return groups;
+      }
+
       function all(builds) {
         var data = new google.visualization.DataTable();
         data.addColumn('string', 'Build');
 
+        var buildIds = builds.map(function(build) {
+          return build.number;
+        });
+
+        var matrices = builds.map(function(build) {
+            return build.matrix;
+        }).reduce(function(x, y){ return x.concat(y); });
+
+        var buildGroups = groupBy(matrices, function(matrix) {
+          return matrix.config.env;
+        });
+
         // Add the columns
-        builds[0].matrix.forEach(function(matrix) {
-          data.addColumn('number', matrix.config.env);
+        Object.keys(buildGroups).forEach(function(key) {
+          data.addColumn('number', key);
         });
 
         builds.forEach(function(build) {
@@ -89,7 +111,8 @@
 
         // Set chart options
         var options = chartOptions('Test Time for ' + name + ' on TravisCI');
-        options.title += ' (stddev: ' + stddev(times) + ')';
+        options.title += ' (mean: ' +
+            mean(times) + ', stddev: ' + stddev(times) + ')';
 
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.LineChart(document.getElementById(elementId));
